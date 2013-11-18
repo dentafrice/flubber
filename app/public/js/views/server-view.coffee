@@ -7,6 +7,7 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
   modelEvents:
     'change:statusCode'     : 'onServerStatusChanged'
     'change:users'          : 'onUsersChange'
+    'change:isLogging'      : 'onLoggingChanged'
     'logMessage:add'        : 'onLogMessageAdded'
 
   events:
@@ -14,7 +15,8 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     'click .start-server'   : 'onStartServerClicked'
     'click .stop-server'    : 'onStopServerClicked'
     'submit .command-form'  : 'onCommandFormSubmitted'
-
+    'change .logging'       : 'onLoggingCheckboxChanged'
+ 
   ui:
     log: 'ul.log'
     users: 'ul.users'
@@ -44,6 +46,8 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     @_renderUsers()
 
   onLogMessageAdded: (message) ->
+    return if not @model.get('isLogging')
+
     @ui.log.append($('<li>').text(message))
 
   onServerStarted: ->
@@ -98,6 +102,16 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     @socket.emit('server:send-command', @model.get('name'), $command.val())
 
     $command.val('')
+
+  onLoggingCheckboxChanged: (e) ->
+    e.preventDefault()
+    @model.set('isLogging', @$('.logging').is(':checked'))
+
+  onLoggingChanged: ->
+    if @model.get('isLogging')
+      @$('.logging-area').removeClass 'hidden'
+    else
+      @$('.logging-area').addClass 'hidden'
 
   _clearLog: ->
     @model.set('logMessages', [])

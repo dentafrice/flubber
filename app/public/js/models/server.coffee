@@ -6,6 +6,7 @@ class Flubber.Models.Server extends Backbone.Model
     statusCode: -2
     users: []
     logMessages: []
+    isLogging: true
 
   getPrettyName: ->
     name = @get('name')

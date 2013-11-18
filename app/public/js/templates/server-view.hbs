@@ -23,17 +23,27 @@
 
   <h3>Console</h3>
   <a href="#" class="clear-log">Clear Log</a>
-  <ul class="log panel panel-default">
-    {{#each logMessages}}
-      <li>{{ this }}</li>
-    {{/each}}
-  </ul>
 
-  <form class="form-inline command-form">
-    <div class="form-group">
-      <input type="text" class="command form-control">
-    </div>
+  <div class="pull-right">
+    <label for="logging">Logging?</label>
+    <input type="checkbox" class="logging" name="logging" checked="checked">
+  </div>
 
-    <button type="submit" class="send btn btn-default">Send</button>
-  </form>
+  <div class="clearfix"></div>
+
+  <div class="logging-area">
+    <ul class="log panel panel-default">
+      {{#each logMessages}}
+        <li>{{ this }}</li>
+      {{/each}}
+    </ul>
+
+    <form class="form-inline command-form">
+      <div class="form-group">
+        <input type="text" class="command form-control">
+      </div>
+
+      <button type="submit" class="send btn btn-default">Send</button>
+    </form>
+  </div>
 </div>
