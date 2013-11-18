@@ -1,4 +1,5 @@
-app = require('express')()
+express = require('express')
+app = express()
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 ServerManager = require './src/server_manager'
@@ -9,8 +10,10 @@ worlds = require './config/worlds'
 io.set('log level', 1)
 server.listen(8080)
 
+app.use express.static(__dirname + '/app/public')
+
 app.get '/', (req, res) ->
-  res.sendfile __dirname + '/index.html'
+  res.sendfile __dirname + '/app/index.html'
 
 # Setup Server Manager
 manager = new ServerManager(worlds: worlds)
