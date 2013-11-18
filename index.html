@@ -1,0 +1,146 @@
+<DOCTYPE html>
+<html>
+  <head>
+    <title>Minecraft Status Page</title>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style type="text/css">
+      body {
+        font-family: Arial, serif;
+      }
+
+      h1, h2 {
+        margin: 5px 0;
+      }
+
+      #log, #users {
+        border: 1px solid black;
+        min-height: 10px;
+        margin: 0;
+      }
+
+      #command_form {
+        border: 1px solid black;
+        border-top: none;
+        padding: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Main Server Status</h1>
+    <div class="server-status main">Loading..</div>
+
+    <a href="#" class="start-server-link" data-server-name="main">Start Server</a>
+
+    <a href="#" class="stop-server-link" data-server-name="main">Stop Server</a>
+
+    <h2>Users</h2>
+    <ul id="users"></ul>
+
+    <h2>Console</h2>
+    <a href="#" class="clear-log">Clear Log</a>
+    <ul id="log"></ul>
+
+    <form id="command_form">
+      <input type="text" id="command">
+      <button id="send" type="submit">Send</button>
+    </form>
+
+    <script>
+      $(function() {
+        window.socket = io.connect('http://localhost');
+
+        $('.clear-log').click(function(e) {
+          e.preventDefault();
+          $('#log').empty();
+        });
+
+        $("#command_form").submit(function(e) {
+          e.preventDefault();
+
+          socket.emit('server:send-command', 'main', $('#command').val());
+
+          $('#command').val('');
+        });
+
+        var updateServerStatus = function(serverName, statusCode) {
+          var status;
+
+          switch(statusCode) {
+            case -1:
+              status = "Offline";
+              break;
+
+            case 0:
+              status = "Starting";
+              break;
+
+            case 1:
+              status = "Started";
+              break;
+          }
+
+          $('.server-status.' + serverName).text(status);
+        };
+
+        var addToLog = function(serverName, data) {
+          $('#log').append($('<li>').text(data));
+        }
+
+        var updateUsersList = function(serverName, users) {
+          $('#users').empty();
+
+          if(!users || users.length == 0) {
+            return;
+          }
+
+          for(var i = 0; i < users.length; i++) {
+            $('#users').append($('<li>').text(users[i]));
+          }
+        };
+
+        socket.on('disconnect', function() {
+          console.log('Disconnected!');
+        })
+
+        socket.on('servers:list-received', function(list) {
+          console.log(list);
+        });
+
+        socket.on('server:stdout', addToLog);
+        socket.on('server:stderr', addToLog);
+        socket.on('server:status-updated', updateServerStatus);
+        socket.on('server:user-list-updated', updateUsersList);
+        socket.on('server:received-users', updateUsersList);
+
+        socket.emit('servers:list');
+        socket.emit('server:get-status', 'main');
+        socket.emit('server:get-users', 'main');
+
+        $('.start-server-link').click(function(e) {
+          e.preventDefault();
+
+          var $el = $(e.target);
+
+          socket.emit('server:start', $el.attr('data-server-name'));
+        });
+
+        $('.stop-server-link').click(function(e) {
+          e.preventDefault();
+
+          var $el = $(e.target);
+          socket.emit('server:stop', $el.attr('data-server-name'));
+        });
+
+        $('.get-users-link').click(function(e) {
+          e.preventDefault();
+
+          var $el = $(e.target);
+          socket.emit('server:get-users', $el.attr('data-server-name'));
+        });
+      });
+    </script>
+  </body>
+</html>

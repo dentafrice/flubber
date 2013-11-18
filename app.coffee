@@ -1,26 +1,23 @@
+app = require('express')()
+server = require('http').createServer(app)
+io = require('socket.io').listen(server)
 ServerManager = require './src/server_manager'
+SocketIOAdapter = require './src/socket_io_adapter'
 worlds = require './config/worlds'
-io = require 'socket.io'
-io.listen(8080)
 
-# Create ServerManager
+# Setup Servers
+io.set('log level', 1)
+server.listen(8080)
+
+app.get '/', (req, res) ->
+  res.sendfile __dirname + '/index.html'
+
+# Setup Server Manager
 manager = new ServerManager(worlds: worlds)
-mainServer = manager.launchWorld 'main'
-
-# Setup Bindings
-mainServer.on 'stdout:dataEmitted', (data) ->
-  process.stdout.write ">> #{data}"
-
-mainServer.on 'stderr:dataEmitted', ->
-  process.stderr.write ">> #{data}"
-
-# Allow us to send commands to the mainServer
-process.stdin.setEncoding 'utf8'
-process.stdin.resume()
-process.stdin.on 'data', (data) ->
-  if data
-    mainServer.write(data)
 
 # Shut down all of the server processes in when this process exits.
 process.on 'exit', ->
   manager.shutdown()
+
+socketAdapter = new SocketIOAdapter(serverManager: manager, io: io)
+socketAdapter.start()
