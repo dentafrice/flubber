@@ -8,10 +8,10 @@ manager = new ServerManager(worlds: worlds)
 mainServer = manager.launchWorld 'main'
 
 # Setup Bindings
-mainServer.on 'stdout:data', (data) ->
+mainServer.on 'stdout:dataEmitted', (data) ->
   process.stdout.write ">> #{data}"
 
-mainServer.on 'stderr:data', ->
+mainServer.on 'stderr:dataEmitted', ->
   process.stderr.write ">> #{data}"
 
 # Allow us to send commands to the mainServer

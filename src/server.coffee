@@ -22,14 +22,14 @@ class Server extends events.EventEmitter
 
   _setDefaultBindings: ->
     @_process.on 'exit', =>
-      @emit 'killed'
+      @emit 'process-killed'
 
     @_process.stdout.on 'data', (data) =>
       if data
-        @emit 'stdout:data', data
+        @emit 'stdout:dataEmitted', data
 
     @_process.stderr.on 'data', (data) =>
       if data
-        @emit 'stderr:data', data
+        @emit 'stderr:dataEmitted', data
 
 module.exports = Server
