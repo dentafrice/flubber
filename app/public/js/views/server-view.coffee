@@ -19,30 +19,26 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     log: 'ul.log'
     users: 'ul.users'
 
+  serializeData: ->
+    data = super
+    data.name = @model.getPrettyName()
+    data.statusText = @model.getStatusText()
+    data
+
   initialize: (opts = {}) ->
     @socket = opts.socket
 
-  getStatusText: ->
-    switch @model.get('statusCode')
-      when -1
-        status = "Offline"
+  enableStartButton: ->
+    @$('.start-server').removeClass 'hidden'
 
-      when 0
-        status = "Starting"
+  disableStartButton: ->
+    @$('.start-server').addClass 'hidden'
 
-      when 1
-        status = "Started"
+  enableStopButton: ->
+    @$('.stop-server').removeClass 'hidden'
 
-      else
-        status = "Loading..."
-
-    return status
-
-  serializeData: ->
-    data = super
-    data.name = data.name.charAt(0).toUpperCase() + data.name.slice(1)
-    data.statusText = @getStatusText()
-    data
+  disableStopButton: ->
+    @$('.stop-server').addClass 'hidden'
 
   onUsersChange: ->
     @_renderUsers()
@@ -51,15 +47,31 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     @ui.log.append($('<li>').text(message))
 
   onServerStatusChanged: ->
-    @$('.server-status').text(@getStatusText())
+    @$('.server-status').text(@model.getStatusText())
 
-    if @model.get('statusCode') < 0
+    statusCode = @model.get('statusCode')
+
+    # If the server just went offline we need to clear the users.
+    if statusCode < 0
       @model.set('users', [])
+      @_clearLog()
+
+      @enableStartButton()
+      @disableStopButton()
+      @$('.server-started').addClass 'hidden'
+    else if statusCode == 0
+      @_clearLog()
+      @disableStartButton()
+      @disableStopButton()
+      @$('.server-started').removeClass 'hidden'
+    else
+      @enableStopButton()
+      @disableStartButton()
+      @$('.server-started').removeClass 'hidden'
 
   onClearLogClicked: (e) ->
     e.preventDefault()
-    @model.set('logMessages', [])
-    @ui.log.empty()
+    @_clearLog()
 
   onStartServerClicked: (e) ->
     e.preventDefault()
@@ -78,6 +90,10 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     @socket.emit('server:send-command', @model.get('name'), $command.val())
 
     $command.val('')
+
+  _clearLog: ->
+    @model.set('logMessages', [])
+    @ui.log.empty()
 
   _renderUsers: ->
     @ui.users.empty()

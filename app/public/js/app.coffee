@@ -2,24 +2,27 @@ class window.App
   start: ->
     @_setupSocket()
     @_fireInitialEvents()
+    @_servers = {}
 
-    @model = new Backbone.Model(name: 'main', statusCode: -2, users: [], logMessages: []) # server
-    @serverView = new Flubber.ServerView(model: @model, socket: @socket)
-    @serverView.render()
-    $('#server_list').append(@serverView.el)
+    # harcoded for now
+    # needs to use the list from the server
+    @_createInitialServer()
 
   onServerDisconnected: =>
     console.log 'Server disconnected'
 
   onServerResponse: (serverName, data) =>
-    @model.get('logMessages').push(data)
-    @model.trigger 'logMessage:add', data
+    view = @_servers[serverName]
+    view.model.get('logMessages').push(data)
+    view.model.trigger 'logMessage:add', data
 
   onServerStatusUpdate: (serverName, statusCode) =>
-    @model.set('statusCode', statusCode)
+    view = @_servers[serverName]
+    view.model.set('statusCode', statusCode)
 
   onUserListUpdate: (serverName, users) =>
-    @model.set('users', users || [])
+    view = @_servers[serverName]
+    view.model.set('users', users || [])
 
   _setupSocket: ->
     @socket = io.connect('http://localhost')
@@ -34,6 +37,12 @@ class window.App
     @socket.on('server:received-users', @onUserListUpdate)
 
   _fireInitialEvents: ->
-    @socket.emit('servers:list')
     @socket.emit('server:get-status', 'main')
     @socket.emit('server:get-users', 'main')
+
+  _createInitialServer: ->
+    model = new Flubber.Models.Server(name: 'main')
+    serverView = new Flubber.ServerView(model: model, socket: @socket)
+    $('#server_list').append(serverView.render().el)
+    
+    @_servers['main'] = serverView
