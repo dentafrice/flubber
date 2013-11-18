@@ -8,6 +8,10 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.1.2/handlebars.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.marionette/1.1.0-bundled/backbone.marionette.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
@@ -17,7 +21,7 @@
         padding-top: 40px;
       }
 
-      #log, #users {
+      .log, .users {
         min-height: 20px;
       }
     </style>
@@ -46,44 +50,10 @@
     <div class="container">
       <h1>Servers</h1>
 
-      <div id="server_list">
-        <div class="server">
-
-          <nav class="navbar navbar-default" role="navigation">
-            <div class="navbar-header">
-              <a class="navbar-brand" href="#">Main</a>
-            </div>
-            
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-3">
-              <p class="navbar-text navbar-right server-status main">
-                Loading..
-              </p>
-
-              <button type="button" data-server-name="main" class="btn btn-default navbar-btn start-server-link">Start Server</button>
-              <button type="button" data-server-name="main" class="btn btn-default navbar-btn stop-server-link">Stop Server</button>
-            </div>
-          </nav>
-          
-
-          <h3>Users</h3>
-          <ul id="users" class="panel panel-default"></ul>
-
-          <h3>Console</h3>
-          <a href="#" class="clear-log">Clear Log</a>
-          <ul id="log" class="panel panel-default"></ul>
-
-          <form class="form-inline" id="command_form">
-            <div class="form-group">
-              <input type="text" id="command" class="form-control">
-            </div>
-
-            <button id="send" type="submit" class="btn btn-default">Send</button>
-          </form>
-        </div>
-      </div>
+      <div id="server_list"></div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="js/Flubber.min.js"></script>
 
     <script>
       $(function() {

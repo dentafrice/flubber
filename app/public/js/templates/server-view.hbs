@@ -1,0 +1,37 @@
+<nav class="navbar navbar-default" role="navigation">
+  <div class="navbar-header">
+    <a class="navbar-brand" href="#">{{ name }}</a>
+  </div>
+  
+  <div class="collapse navbar-collapse">
+    <p class="navbar-text navbar-right server-status main">
+      {{ statusText }}
+    </p>
+
+    <button type="button" class="btn btn-default navbar-btn start-server">Start Server</button>
+    <button type="button" class="btn btn-default navbar-btn stop-server">Stop Server</button>
+  </div>
+</nav>
+
+<h3>Users</h3>
+<ul class="users panel panel-default">
+  {{#each users}}
+    <li>{{ this }}</li>
+  {{/each}}
+</ul>
+
+<h3>Console</h3>
+<a href="#" class="clear-log">Clear Log</a>
+<ul class="log panel panel-default">
+  {{#each logMessages}}
+    <li>{{ this }}</li>
+  {{/each}}
+</ul>
+
+<form class="form-inline" class="command-form">
+  <div class="form-group">
+    <input type="text" class="command form-control">
+  </div>
+
+  <button type="submit" class="send btn btn-default">Send</button>
+</form>
