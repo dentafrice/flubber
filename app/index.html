@@ -3,6 +3,11 @@
   <head>
     <title>Minecraft Status Page</title>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
@@ -78,98 +83,11 @@
       </div>
     </div>
 
+    <script src="js/app.js"></script>
+
     <script>
       $(function() {
-        window.socket = io.connect('http://localhost');
-
-        $('.clear-log').click(function(e) {
-          e.preventDefault();
-          $('#log').empty();
-        });
-
-        $("#command_form").submit(function(e) {
-          e.preventDefault();
-
-          socket.emit('server:send-command', 'main', $('#command').val());
-
-          $('#command').val('');
-        });
-
-        var updateServerStatus = function(serverName, statusCode) {
-          var status;
-
-          switch(statusCode) {
-            case -1:
-              status = "Offline";
-              break;
-
-            case 0:
-              status = "Starting";
-              break;
-
-            case 1:
-              status = "Started";
-              break;
-          }
-
-          $('.server-status.' + serverName).text(status);
-        };
-
-        var addToLog = function(serverName, data) {
-          $('#log').append($('<li>').text(data));
-        }
-
-        var updateUsersList = function(serverName, users) {
-          $('#users').empty();
-
-          if(!users || users.length == 0) {
-            return;
-          }
-
-          for(var i = 0; i < users.length; i++) {
-            $('#users').append($('<li>').text(users[i]));
-          }
-        };
-
-        socket.on('disconnect', function() {
-          console.log('Disconnected!');
-        })
-
-        socket.on('servers:list-received', function(list) {
-          console.log(list);
-        });
-
-        socket.on('server:stdout', addToLog);
-        socket.on('server:stderr', addToLog);
-        socket.on('server:status-updated', updateServerStatus);
-        socket.on('server:user-list-updated', updateUsersList);
-        socket.on('server:received-users', updateUsersList);
-
-        socket.emit('servers:list');
-        socket.emit('server:get-status', 'main');
-        socket.emit('server:get-users', 'main');
-
-        $('.start-server-link').click(function(e) {
-          e.preventDefault();
-
-          var $el = $(e.target);
-
-          socket.emit('server:start', $el.attr('data-server-name'));
-        });
-
-        $('.stop-server-link').click(function(e) {
-          e.preventDefault();
-
-          var $el = $(e.target);
-          socket.emit('server:stop', $el.attr('data-server-name'));
-        });
-
-        $('.get-users-link').click(function(e) {
-          e.preventDefault();
-
-          var $el = $(e.target);
-          socket.emit('server:get-users', $el.attr('data-server-name'));
-        });
+        var app = new App().start();
       });
     </script>
   </body>
