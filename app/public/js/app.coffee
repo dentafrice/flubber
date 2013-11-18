@@ -1,7 +1,6 @@
 class window.App
   start: ->
     @_setupSocket()
-    @_fireInitialEvents()
     @_servers = {}
 
     # harcoded for now
@@ -9,7 +8,10 @@ class window.App
     @_createInitialServer()
 
   onServerDisconnected: =>
-    console.log 'Server disconnected'
+    console.log '>> Server disconnected'
+    @socket.once 'connect', =>
+      console.log '>> Server connected'
+      @_createInitialServer()
 
   onServerResponse: (serverName, data) =>
     view = @_servers[serverName]
@@ -36,13 +38,16 @@ class window.App
     @socket.on('server:user-list-updated', @onUserListUpdate)
     @socket.on('server:received-users', @onUserListUpdate)
 
-  _fireInitialEvents: ->
-    @socket.emit('server:get-status', 'main')
-    @socket.emit('server:get-users', 'main')
-
   _createInitialServer: ->
+    if @_servers['main']
+      @_servers['main'].close()
+      delete @_servers['main']
+
     model = new Flubber.Models.Server(name: 'main')
     serverView = new Flubber.ServerView(model: model, socket: @socket)
     $('#server_list').append(serverView.render().el)
     
     @_servers['main'] = serverView
+
+    @socket.emit('server:get-status', 'main')
+    @socket.emit('server:get-users', 'main')
