@@ -73,6 +73,8 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
     e.preventDefault()
     $command = @$('.command')
 
+    return unless $command.val()
+
     @socket.emit('server:send-command', @model.get('name'), $command.val())
 
     $command.val('')
