@@ -46,6 +46,24 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
   onLogMessageAdded: (message) ->
     @ui.log.append($('<li>').text(message))
 
+  onServerStarted: ->
+    @enableStopButton()
+    @disableStartButton()
+    @$('.server-started').removeClass 'hidden'
+
+  onServerPending: ->
+    @disableStartButton()
+    @disableStopButton()
+    @$('.server-started').removeClass 'hidden'
+
+  onServerStopped: ->
+    @_clearLog()
+    @_clearUsers()
+
+    @enableStartButton()
+    @disableStopButton()
+    @$('.server-started').addClass 'hidden'
+
   onServerStatusChanged: ->
     @$('.server-status').text(@model.getStatusText())
 
@@ -53,21 +71,11 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
 
     # If the server just went offline we need to clear the users.
     if statusCode < 0
-      @model.set('users', [])
-      @_clearLog()
-
-      @enableStartButton()
-      @disableStopButton()
-      @$('.server-started').addClass 'hidden'
+      @triggerMethod 'server:stopped'
     else if statusCode == 0
-      @_clearLog()
-      @disableStartButton()
-      @disableStopButton()
-      @$('.server-started').removeClass 'hidden'
+      @triggerMethod 'server:pending'
     else
-      @enableStopButton()
-      @disableStartButton()
-      @$('.server-started').removeClass 'hidden'
+      @triggerMethod 'server:started'
 
   onClearLogClicked: (e) ->
     e.preventDefault()
@@ -94,6 +102,10 @@ class Flubber.ServerView extends Backbone.Marionette.ItemView
   _clearLog: ->
     @model.set('logMessages', [])
     @ui.log.empty()
+
+  _clearUsers: ->
+    @model.set('users', [])
+    @ui.users.empty()
 
   _renderUsers: ->
     @ui.users.empty()
