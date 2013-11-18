@@ -22,5 +22,8 @@ manager = new ServerManager(worlds: worlds)
 process.on 'exit', ->
   manager.shutdown()
 
+process.on 'SIGTERM', ->
+  process.exit()
+
 socketAdapter = new SocketIOAdapter(serverManager: manager, io: io)
 socketAdapter.start()
